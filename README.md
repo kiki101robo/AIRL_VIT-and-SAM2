@@ -204,35 +204,44 @@ This implementation performs **text-prompted video object segmentation** by comb
 
 ## How to Run in Colab
 
-### Setup
-1. **Create a new Colab notebook** with GPU runtime:
+### Quick Start (Recommended)
+1. **Download `q2.ipynb`** from the repository
+2. **Upload to Google Colab**:
+   - Go to [colab.research.google.com](https://colab.research.google.com)
+   - File → Upload notebook → Select `q2.ipynb`
+3. **Set GPU runtime**:
    - Runtime → Change runtime type → GPU (T4 or better)
+4. **Upload your test video** (optional):
+   - Click the folder icon in left sidebar
+   - Upload your `.mp4` file
+   - Update `VIDEO_PATH` in the notebook if using custom video
+5. **Run all cells**:
+   - Runtime → Run all (Ctrl+F9)
+   - The notebook will automatically:
+     - Install dependencies
+     - Download models (~2-3 GB on first run)
+     - Process the video
+     - Save output to `/content/text_segmentation_output.mp4`
+6. **Download results**:
+   - Right-click `text_segmentation_output.mp4` → Download
 
-2. **Install dependencies**:
+**Default settings**: Processes demo video with prompt "bird" for 30 seconds. Modify `TEXT_PROMPT` variable in the notebook to segment different objects.
+
+### Manual Setup (Alternative)
+If you prefer to build from scratch:
+
+1. Create new Colab notebook with GPU runtime
+2. Install dependencies:
 ```python
 !pip -q install sam2 transformers timm opencv-python matplotlib pillow scipy
 ```
-
-3. **Upload your video**:
-   - Click the folder icon in the left sidebar
-   - Upload your `.mp4` video file
-   - Note the path (e.g., `/content/your_video.mp4`)
-
-### Run Segmentation
-4. **Copy the complete script** into a cell and modify these variables:
+3. Copy the complete pipeline code from the repository
+4. Set your video path and text prompt:
 ```python
-VIDEO_PATH = "/content/your_video.mp4"  # Your uploaded video path
-TEXT_PROMPT = "bird"                    # Object to segment (e.g., "person", "car", "dog")
+VIDEO_PATH = "/content/your_video.mp4"
+TEXT_PROMPT = "bird"  # Change to target object
 ```
-
-5. **Execute the cell**. The pipeline will:
-   - Load CLIPSeg and SAM2 models (~2-3 GB download on first run)
-   - Process the video (first 30 seconds by default)
-   - Generate segmentation masks using text guidance
-   - Save output to `/content/text_segmentation_output.mp4`
-
-6. **Download results**:
-   - Right-click `text_segmentation_output.mp4` in Files panel → Download
+5. Execute the cell
 
 ## Pipeline Architecture
 
@@ -248,10 +257,10 @@ Text: "bird" → CLIPSeg → Heatmap → Otsu threshold → Connected components
 - Otsu thresholding + connected components extract discrete objects
 - Filters small noise (min area = 300 pixels)
 
-**[Insert Image 1: CLIPSeg heatmap visualization here]**  
+![CLIPSeg Heatmap](assets/1st sam.png)  
 *The heatmap shows high activation (red/yellow) on target birds, with automatic thresholding isolating multiple instances.*
 
-**[Insert Image 2: Binary seed masks here]**  
+![Binary Seed Masks](path/to/image2.png)  
 *Connected component analysis extracts clean binary masks for each detected bird.*
 
 ### Stage 2: Mask Refinement (SAM2)
@@ -274,7 +283,7 @@ This produces pixel-accurate boundaries even when CLIPSeg is noisy.
 
 **Fallback**: If warped mask collapses (area < 50 pixels), use full-frame mask to recover tracking.
 
-**[Insert Image 3: SAM2-refined output frame here]**  
+![SAM2 Refined Output](path/to/image3.png)  
 *Final segmentation with precise boundaries and consistent tracking across frames. Note how individual birds maintain identity despite motion.*
 
 ## Results
@@ -287,7 +296,7 @@ This produces pixel-accurate boundaries even when CLIPSeg is noisy.
   - Segmentation accuracy: Tracks all 6 instances with minimal drift
   - Robustness: Handles occlusion, fast motion, and scale variation
 
-**[Insert Image 4: Original input frame here]**  
+![Original Input Frame](path/to/image4.png)  
 *Source footage showing the challenging multi-object scenario with overlapping birds and complex background.*
 
 ### Quantitative Metrics
@@ -356,8 +365,8 @@ This requires ID association logic across frames (e.g., IoU matching, ReID featu
 
 ### 5. Prompt Engineering
 **Text prompt quality matters**:
--  **Good**: "bird", "person wearing red jacket", "blue car"
--  **Bad**: "the big one", "it", "main object"
+- Good: "bird", "person wearing red jacket", "blue car"
+- Bad: "the big one", "it", "main object"
 
 **Specificity helps**:
 - Generic: "bird" → segments all avian objects
@@ -385,13 +394,25 @@ This pipeline demonstrates **zero-shot video segmentation** without training on 
 - **Visual precision** (SAM2's prompted segmentation)
 - **Temporal coherence** (optical flow propagation)
 
-I achieve robust object tracking from text alone. The approach generalizes to any object describable in natural language, making it highly practical for creative video editing, dataset annotation, and visual effects applications where manual annotation is prohibitive.
+...we achieve robust object tracking from text alone. The approach generalizes to any object describable in natural language, making it highly practical for creative video editing, dataset annotation, and visual effects applications where manual annotation is prohibitive.
 
 ---
 
-## Image Placement Guide
+## Troubleshooting
 
-- **Image 1 (CLIPSeg heatmap)**: Place after "Stage 1: Initial Segmentation (CLIPSeg)" description
-- **Image 2 (Binary seed masks)**: Place immediately after Image 1, before Stage 2
-- **Image 3 (SAM2 refined output)**: Place after "Stage 3: Temporal Propagation" description
-- **Image 4 (Original input frame)**: Place in "Example: Bird Segmentation" section under Results
+### Common Issues
+1. **"CUDA out of memory"**: 
+   - Restart runtime and re-run
+   - Use smaller video resolution or shorter clips
+   
+2. **"Cannot open video"**:
+   - Verify `VIDEO_PATH` is correct
+   - Ensure video is uploaded to Colab filesystem
+   
+3. **"No foreground found"**:
+   - Try more specific text prompt
+   - Check if object is visible in first frame
+   
+4. **Slow processing**:
+   - Confirm GPU is enabled (check `torch.cuda.is_available()`)
+   - Reduce `max_seconds` parameter
