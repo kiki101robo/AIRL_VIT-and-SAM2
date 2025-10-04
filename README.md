@@ -194,6 +194,7 @@ For small image datasets (32×32 CIFAR-10), a moderately-sized ViT (10M params) 
 - Aggressive augmentation + clean fine-tuning
 
 It achieves **state-of-the-art accuracy while using fewer parameters than the teacher**, demonstrating that ViTs' representational capacity can overcome their lack of built-in visual priors when guided by proper training strategies.
+The best weights for the teacher(RESNET50) and student(ViT) can be found on this link : https://drive.google.com/drive/folders/1SHdXjDSgzpGS93cNx269r6CQPbl1_6Qa?usp=sharing
 
 ---
 
