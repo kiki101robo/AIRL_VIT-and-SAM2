@@ -257,10 +257,10 @@ Text: "bird" → CLIPSeg → Heatmap → Otsu threshold → Connected components
 - Otsu thresholding + connected components extract discrete objects
 - Filters small noise (min area = 300 pixels)
 
-![CLIPSeg Heatmap](assets/1st sam.png)  
+![CLIPSeg Heatmap](assets/1stsam.png)  
 *The heatmap shows high activation (red/yellow) on target birds, with automatic thresholding isolating multiple instances.*
 
-![Binary Seed Masks](path/to/image2.png)  
+![Binary Seed Masks](assets/2ndsam.png)  
 *Connected component analysis extracts clean binary masks for each detected bird.*
 
 ### Stage 2: Mask Refinement (SAM2)
@@ -283,7 +283,7 @@ This produces pixel-accurate boundaries even when CLIPSeg is noisy.
 
 **Fallback**: If warped mask collapses (area < 50 pixels), use full-frame mask to recover tracking.
 
-![SAM2 Refined Output](path/to/image3.png)  
+![SAM2 Refined Output](assets/finalsam.png)  
 *Final segmentation with precise boundaries and consistent tracking across frames. Note how individual birds maintain identity despite motion.*
 
 ## Results
