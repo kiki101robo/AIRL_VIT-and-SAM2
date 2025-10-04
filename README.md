@@ -326,7 +326,7 @@ The pipeline generates three visualizations:
 - ![](assets/istockphoto-480841066-640_adpp_is.gif)
 - **Output Video**: [Download Output Video](assets/text_segmentation_output.mp4)
 - MP4 file with colored segmentation overlays at original FPS
-- ![](assets/text_segmentation_output.mp4)
+- ![](assets/text_segmentation_output.gif)
 - Saved to `/content/text_segmentation_output.mp4`
 
 ## Model Details
