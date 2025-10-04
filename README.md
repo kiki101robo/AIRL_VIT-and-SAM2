@@ -93,9 +93,9 @@ All outputs saved to `eval_artifacts/` directory.
 
 ### Confusion Matrix Analysis
 
-**[Insert Image 1: Confusion Matrix (Counts) here]**
+**![Confusion Matrix (Counts)](assets/confusion_counts.png)**
 
-**[Insert Image 2: Confusion Matrix (Normalized) here]**
+**![Confusion Matrix (Normalized)](assets/confusion_normalized.png)**
 
 The confusion matrices reveal interesting patterns:
 - **Strong diagonal**: Most classes achieve >94% correct classification
@@ -105,7 +105,7 @@ The confusion matrices reveal interesting patterns:
 
 ### Sample Predictions
 
-**[Insert Image 4: Prediction Grid here]**
+**![Prediction Grid here](assets/pred_grid.png)**
 
 The prediction grid shows high-confidence correct classifications across diverse examples, with the model maintaining >90% confidence even on challenging instances (occluded objects, unusual viewpoints, low contrast).
 
