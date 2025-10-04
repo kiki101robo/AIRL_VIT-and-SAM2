@@ -312,18 +312,18 @@ stride = 1                 # Frame sampling rate
 The pipeline generates three visualizations:
 
 1. **Heatmap**: CLIPSeg probability map showing confidence scores
-   ![Heatmap Example](assets/heatmap.png)
+   ![Heatmap Example](assets/1stsam.png)
 
 2. **Binary Mask**: Thresholded segmentation mask (all detected instances)
-   ![Mask Example](assets/mask.png)
+   ![Mask Example](assets/2ndsam.png)
 
 3. **Segmented Overlay**: Final SAM2-refined segmentation with colored overlay
-   ![Segmented Example](assets/segmented.png)
+   ![Segmented Example](assets/finalsam.png)
 
 ### Video Segmentation Results
 
-- **Input Video**: [Download Input Video](assets/input_video.mp4)
-- **Output Video**: [Download Output Video](assets/output_video.mp4)
+- **Input Video**: [Download Input Video](assets/istockphoto-480841066-640_adpp_is.mp4)
+- **Output Video**: [Download Output Video](assets/text_segmentation_output.mp4)
 - MP4 file with colored segmentation overlays at original FPS
 - Saved to `/content/text_segmentation_output.mp4`
 
