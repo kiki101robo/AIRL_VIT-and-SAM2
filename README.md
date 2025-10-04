@@ -1,6 +1,6 @@
 # AIRL_VIT-and-SAM2
 
-# Vision Transformer for CIFAR-10 Classification
+# Q1 Vision Transformer for CIFAR-10 Classification
 
 ## Overview
 This implementation trains a Vision Transformer (ViT) on CIFAR-10 using knowledge distillation from a strong ResNet-50 teacher. The model achieves **95.69% test accuracy** with excellent per-class performance across all categories.
@@ -209,7 +209,7 @@ For small image datasets (32×32 CIFAR-10), a moderately-sized ViT (10M params) 
 - **Image 3 (Per-class Accuracy Bar Chart)**: Place after the Per-Class Performance table
 - **Image 4 (Prediction Grid)**: Place after "Sample Predictions" heading
 
-# Text-Guided Video Segmentation with CLIPSeg + SAM2
+# Q2 Text-Guided Video Segmentation with CLIPSeg + SAM2
 
 ## Overview
 This implementation performs **text-prompted video object segmentation** by combining CLIPSeg (language-guided segmentation) and SAM2 (Segment Anything Model 2). Given a text description (e.g., "bird", "car", "person"), the pipeline automatically segments and tracks the target object across video frames using optical flow propagation and SAM2 refinement.
@@ -368,8 +368,8 @@ This requires ID association logic across frames (e.g., IoU matching, ReID featu
 
 ### 5. Prompt Engineering
 **Text prompt quality matters**:
-- ✅ **Good**: "bird", "person wearing red jacket", "blue car"
-- ❌ **Bad**: "the big one", "it", "main object"
+-  **Good**: "bird", "person wearing red jacket", "blue car"
+-  **Bad**: "the big one", "it", "main object"
 
 **Specificity helps**:
 - Generic: "bird" → segments all avian objects
@@ -397,7 +397,7 @@ This pipeline demonstrates **zero-shot video segmentation** without training on 
 - **Visual precision** (SAM2's prompted segmentation)
 - **Temporal coherence** (optical flow propagation)
 
-...we achieve robust object tracking from text alone. The approach generalizes to any object describable in natural language, making it highly practical for creative video editing, dataset annotation, and visual effects applications where manual annotation is prohibitive.
+I achieve robust object tracking from text alone. The approach generalizes to any object describable in natural language, making it highly practical for creative video editing, dataset annotation, and visual effects applications where manual annotation is prohibitive.
 
 ---
 
