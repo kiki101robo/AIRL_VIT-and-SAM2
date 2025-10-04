@@ -318,7 +318,7 @@ The pipeline generates three visualizations:
    ![Mask Example](assets/2ndsam.png)
 
 3. **Segmented Overlay**: Final SAM2-refined segmentation with colored overlay
-   ![Segmented Example](assets/finalsam.png)
+   ![Segmented Example](assets/assets/finalsam.png)
 
 ### Video Segmentation Results
 
