@@ -198,7 +198,7 @@ For small image datasets (32×32 CIFAR-10), a moderately-sized ViT (10M params) 
 - Hybrid attention (full→class-attention transition)
 - Aggressive augmentation + clean fine-tuning
 
-...achieves **state-of-the-art accuracy while using fewer parameters than the teacher**, demonstrating that ViTs' representational capacity can overcome their lack of built-in visual priors when guided by proper training strategies.
+It achieves **state-of-the-art accuracy while using fewer parameters than the teacher**, demonstrating that ViTs' representational capacity can overcome their lack of built-in visual priors when guided by proper training strategies.
 
 ---
 
