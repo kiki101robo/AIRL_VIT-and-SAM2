@@ -89,7 +89,7 @@ All outputs saved to `eval_artifacts/` directory.
 **Best performing classes**: Automobile, Frog, Ship, Truck (>97.4%)  
 **Most challenging class**: Cat (88.4% - confused with Dog 6.2% of the time)
 
-**[Insert Image 3: Per-class Accuracy Bar Chart here]**
+**![Per-class Accuracy Bar Chart](assets/per_class_accuracy.png)**
 
 ### Confusion Matrix Analysis
 
