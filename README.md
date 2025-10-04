@@ -7,12 +7,10 @@ This implementation trains a Vision Transformer (ViT) on CIFAR-10 using knowledg
 
 ## How to Run in Colab
 
-### Training
-1. **Set runtime**: Runtime → Change runtime type → GPU (T4/A100 recommended)
-2. **Run the training script**:
-```python
-!python vit_cifar10_kd.py
-```
+### Training + Evaluation
+1. **Download the q1.ipynb**
+2. **Set runtime**: Runtime → Change runtime type → GPU (T4/A100 recommended)
+3. **Run the all the cells**
 
 The script will:
 - Download CIFAR-10 automatically
@@ -21,10 +19,7 @@ The script will:
 - Save checkpoints: `teacher_resnet50_cifar10.pt`, `vit_cifar10_best.pt`, `vit_cifar10_last.pt`
 
 ### Evaluation
-3. **Run the evaluation script** (requires training to complete first):
-```python
-!python eval_vit_cifar10.py
-```
+3. **If ran all the cells then it will run automaitically after training** (requires training to complete first)
 
 This generates:
 - Confusion matrices (counts and normalized)
@@ -32,7 +27,7 @@ This generates:
 - Sample predictions grid (36 images)
 - Detailed classification report
 
-All outputs saved to `eval_artifacts/` directory.
+All outputs saved to `eval_artifacts/` directory in the colab side bar mount.
 
 ## Best Model Configuration
 
@@ -201,13 +196,6 @@ For small image datasets (32×32 CIFAR-10), a moderately-sized ViT (10M params) 
 It achieves **state-of-the-art accuracy while using fewer parameters than the teacher**, demonstrating that ViTs' representational capacity can overcome their lack of built-in visual priors when guided by proper training strategies.
 
 ---
-
-## Image Placement Guide
-
-- **Image 1 (Confusion Matrix - Counts)**: Place after "Confusion Matrix Analysis" heading
-- **Image 2 (Confusion Matrix - Normalized)**: Place immediately after Image 1
-- **Image 3 (Per-class Accuracy Bar Chart)**: Place after the Per-Class Performance table
-- **Image 4 (Prediction Grid)**: Place after "Sample Predictions" heading
 
 # Q2 Text-Guided Video Segmentation with CLIPSeg + SAM2
 
