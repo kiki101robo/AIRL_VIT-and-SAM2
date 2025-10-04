@@ -197,222 +197,165 @@ It achieves **state-of-the-art accuracy while using fewer parameters than the te
 
 ---
 
-# Q2 Text-Guided Video Segmentation with CLIPSeg + SAM2
+# Q2 Text-Guided Image and Video Segmentation with CLIPSeg + SAM2
+
+A powerful pipeline combining CLIPSeg and SAM2 for text-guided segmentation of both images and videos. Simply describe what you want to segment using natural language, and the models will identify and track those objects across frames.
 
 ## Overview
-This implementation performs **text-prompted video object segmentation** by combining CLIPSeg (language-guided segmentation) and SAM2 (Segment Anything Model 2). Given a text description (e.g., "bird", "car", "person"), the pipeline automatically segments and tracks the target object across video frames using optical flow propagation and SAM2 refinement.
 
-## How to Run in Colab
+This project implements a two-stage segmentation approach:
 
-### Quick Start (Recommended)
-1. **Download `q2.ipynb`** from the repository
-2. **Upload to Google Colab**:
-   - Go to [colab.research.google.com](https://colab.research.google.com)
-   - File → Upload notebook → Select `q2.ipynb`
-3. **Set GPU runtime**:
-   - Runtime → Change runtime type → GPU (T4 or better)
-4. **Upload your test video** (optional):
-   - Click the folder icon in left sidebar
-   - Upload your `.mp4` file
-   - Update `VIDEO_PATH` in the notebook if using custom video
-5. **Run all cells**:
-   - Runtime → Run all (Ctrl+F9)
-   - The notebook will automatically:
-     - Install dependencies
-     - Download models (~2-3 GB on first run)
-     - Process the video
-     - Save output to `/content/text_segmentation_output.mp4`
-6. **Download results**:
-   - Right-click `text_segmentation_output.mp4` → Download
+1. **CLIPSeg** provides initial text-based object localization using CLIP embeddings
+2. **SAM2** refines the segmentation with precise boundaries and multi-instance support
+3. **Optical Flow** propagates masks across video frames for temporal consistency
 
-**Default settings**: Processes demo video with prompt "bird" for 30 seconds. Modify `TEXT_PROMPT` variable in the notebook to segment different objects.
+**Key Features:**
+- Text-driven segmentation (e.g., "bird", "person", "red car")
+- Multi-instance detection and tracking
+- Video segmentation with temporal propagation
+- High-quality mask refinement
+- Configurable thresholds and parameters
 
-### Manual Setup (Alternative)
-If you prefer to build from scratch:
+## Setup
 
-1. Create new Colab notebook with GPU runtime
-2. Install dependencies:
+### Requirements
+- Google Colab with A100 GPU (recommended)
+- Python 3.8+
+- CUDA-compatible GPU
+
+### Quick Start
+
+1. **Download the notebook:**
+   - Download `q2.ipynb` from this repository
+
+2. **Open in Google Colab:**
+   - Go to [Google Colab](https://colab.research.google.com/)
+   - Upload `q2.ipynb`
+   - Set runtime to **GPU (A100)**: `Runtime` → `Change runtime type` → `Hardware accelerator: GPU` → `GPU type: A100`
+
+3. **Run the notebook:**
+   - Execute all cells in order
+   - The notebook will automatically install dependencies and download models
+
+## Usage
+
+### Image Segmentation
+
 ```python
-!pip -q install sam2 transformers timm opencv-python matplotlib pillow scipy
+# Load your image
+TEXT_PROMPT = "bird"  # Describe what you want to segment
+image_pil = imread_any("path/to/your/image.jpg")
+
+# The notebook will:
+# 1. Generate initial masks with CLIPSeg
+# 2. Refine with SAM2
+# 3. Display overlay visualization
 ```
-3. Copy the complete pipeline code from the repository
-4. Set your video path and text prompt:
+
+### Video Segmentation
+
 ```python
+# Configure video processing
 VIDEO_PATH = "/content/your_video.mp4"
-TEXT_PROMPT = "bird"  # Change to target object
+TEXT_PROMPT = "Bird"  # Object to track
+
+# The pipeline will:
+# 1. Extract frames from video
+# 2. Segment first frame with CLIPSeg + SAM2
+# 3. Propagate masks using optical flow
+# 4. Refine each frame with SAM2
+# 5. Save segmented video with overlays
 ```
-5. Execute the cell
+
+### Customization
+
+Adjust parameters in the notebook:
+
+```python
+# CLIPSeg thresholding
+min_cc_area = 300          # Minimum component size (pixels)
+top_pct_fallback = 0.97    # Fallback threshold percentile
+
+# SAM2 prompting
+n_pos = 8                  # Number of positive sample points
+n_neg = 8                  # Number of negative sample points
+border = 5                 # Border size for negative sampling
+
+# Video processing
+max_seconds = 30           # Maximum video duration to process
+stride = 1                 # Frame sampling rate
+```
 
 ## Pipeline Architecture
 
-### Stage 1: Initial Segmentation (CLIPSeg)
-**Input**: First frame + text prompt  
-**Output**: Binary seed mask(s)
+### Stage 1: CLIPSeg Text-to-Mask
+- Encodes text prompt and image with CLIP
+- Generates coarse segmentation heatmap
+- Applies Otsu thresholding for binary masks
+- Extracts connected components for multi-instance support
 
-```
-Text: "bird" → CLIPSeg → Heatmap → Otsu threshold → Connected components
-```
+### Stage 2: SAM2 Refinement
+- Uses CLIPSeg masks as prompts (boxes + sampled points)
+- Generates high-quality segmentation boundaries
+- Handles multiple object instances independently
 
-- CLIPSeg generates language-aligned activation map
-- Otsu thresholding + connected components extract discrete objects
-- Filters small noise (min area = 300 pixels)
+### Stage 3: Video Propagation (Video Mode)
+- Computes optical flow between consecutive frames
+- Warps previous mask to current frame
+- Refines warped mask with SAM2
+- Handles occlusions and mask collapses with fallback
 
-![CLIPSeg Heatmap](assets/1stsam.png)  
-*The heatmap shows high activation (red/yellow) on target birds, with automatic thresholding isolating multiple instances.*
+## Output
 
-![Binary Seed Masks](assets/2ndsam.png)  
-*Connected component analysis extracts clean binary masks for each detected bird.*
+### Image Segmentation Results
 
-### Stage 2: Mask Refinement (SAM2)
-**Input**: RGB frame + coarse mask  
-**Output**: Precise segmentation mask
+The pipeline generates three visualizations:
 
-SAM2 refines the seed mask using:
-- **Bounding box prompt**: Extracted from mask extent
-- **Point prompts**: 8 positive points (inside mask) + 8 negative points (outside mask)
-- **Multi-mask scoring**: Selects best mask from 3 candidates
+1. **Heatmap**: CLIPSeg probability map showing confidence scores
+   ![Heatmap Example](assets/heatmap.png)
 
-This produces pixel-accurate boundaries even when CLIPSeg is noisy.
+2. **Binary Mask**: Thresholded segmentation mask (all detected instances)
+   ![Mask Example](assets/mask.png)
 
-### Stage 3: Temporal Propagation (Optical Flow + SAM2)
-**For each frame `t`**:
-1. Compute dense optical flow: `frame[t-1] → frame[t]`
-2. Warp previous mask using flow vectors
-3. Refine warped mask with SAM2
-4. Update mask for next iteration
+3. **Segmented Overlay**: Final SAM2-refined segmentation with colored overlay
+   ![Segmented Example](assets/segmented.png)
 
-**Fallback**: If warped mask collapses (area < 50 pixels), use full-frame mask to recover tracking.
+### Video Segmentation Results
 
-![SAM2 Refined Output](assets/finalsam.png)  
-*Final segmentation with precise boundaries and consistent tracking across frames. Note how individual birds maintain identity despite motion.*
+- **Input Video**: [Download Input Video](assets/input_video.mp4)
+- **Output Video**: [Download Output Video](assets/output_video.mp4)
+- MP4 file with colored segmentation overlays at original FPS
+- Saved to `/content/text_segmentation_output.mp4`
 
-## Results
+## Model Details
 
-### Example: Bird Segmentation
-- **Video**: Puffin colony scene (6 birds on rock)
-- **Prompt**: "bird"
-- **Performance**: 
-  - Processing speed: ~2-3 fps on T4 GPU
-  - Segmentation accuracy: Tracks all 6 instances with minimal drift
-  - Robustness: Handles occlusion, fast motion, and scale variation
-
-![Original Input Frame](path/to/image4.png)  
-*Source footage showing the challenging multi-object scenario with overlapping birds and complex background.*
-
-### Quantitative Metrics
-| Metric | Value |
-|--------|-------|
-| Frames processed | 30 fps × 30 sec = 900 frames |
-| Average IoU (manual check) | ~87% |
-| Tracking failures | 0 (no redetection needed) |
-| GPU memory | ~4.2 GB (SAM2-hiera-small) |
-
-## Technical Analysis
-
-### 1. Why CLIPSeg + SAM2?
-**CLIPSeg alone** struggles with:
-- Imprecise boundaries (low-res feature maps)
-- Semantic ambiguity ("bird" activates sky, trees, etc.)
-- No temporal consistency
-
-**SAM2 alone** requires:
-- Manual prompts per frame (infeasible for video)
-- No semantic understanding (segments "anything", not specific objects)
-
-**Combined pipeline**:
-- CLIPSeg provides semantic grounding via language
-- SAM2 provides pixel-perfect boundaries and tracking
-- Optical flow bridges temporal gaps between frames
-
-### 2. Optical Flow vs. SAM2 Video Tracker
-**Our approach**: Frame-by-frame SAM2 refinement with flow-based propagation
-
-**Alternative**: SAM2's built-in video tracking mode
-
-**Trade-offs**:
-| Approach | Pros | Cons |
-|----------|------|------|
-| Ours | Simple, robust to drift, works with any SAM2 checkpoint | Slower (2-3 fps) |
-| SAM2 Video | Faster (~10 fps), memory-efficient | Requires specific video checkpoints, more complex setup |
-
-We prioritize simplicity and compatibility—this implementation works out-of-the-box with standard SAM2 image models.
-
-### 3. Connected Components vs. Instance Segmentation
-**Current**: Treat all mask components as single "target class"
-
-Example: "bird" → all 6 birds merged into unified mask overlay
-
-**Alternative**: Track each bird independently with unique IDs
-
-**Implementation note**: To enable per-instance tracking:
-```python
-# Keep components separate and refine individually
-refined_masks = [refine_with_sam2(frame, comp) for comp in comps]
-```
-
-This requires ID association logic across frames (e.g., IoU matching, ReID features).
-
-### 4. Failure Modes & Recovery
-**Observed issues**:
-1. **Mask collapse**: Optical flow fails on large displacements → fallback to full-frame mask
-2. **False positives**: CLIPSeg activates on similar textures → filter by min area (300 px)
-3. **Occlusion**: Birds overlap → SAM2's multi-mask output helps separate instances
-
-**Potential improvements**:
-- Periodically re-run CLIPSeg (every N frames) to re-anchor semantic grounding
-- Use confidence scores from SAM2 to trigger redetection
-- Add motion-based filtering (remove static "false birds")
-
-### 5. Prompt Engineering
-**Text prompt quality matters**:
-- Good: "bird", "person wearing red jacket", "blue car"
-- Bad: "the big one", "it", "main object"
-
-**Specificity helps**:
-- Generic: "bird" → segments all avian objects
-- Specific: "puffin" → targets specific species (if in CLIPSeg training data)
-
-**Multi-object prompts**:
-- "bird and rock" → segments both (union)
-- Separate passes needed for distinct tracking
-
-### 6. Computational Efficiency
-**Bottlenecks**:
-1. SAM2 inference: ~300-400 ms/frame (T4 GPU)
-2. Optical flow: ~50 ms/frame (CPU)
-3. CLIPSeg: ~100 ms (first frame only)
-
-**Optimization strategies**:
-- Lower resolution: Resize frames to 512×288 → 2x speedup
-- Sparse refinement: Run SAM2 every 5 frames, interpolate between
-- Faster flow: Use RAFT or FlowNet2 instead of Farneback
-- Batch processing: Process multiple frames simultaneously (requires memory)
-
-### Key Insight
-This pipeline demonstrates **zero-shot video segmentation** without training on video data. By combining:
-- **Language grounding** (CLIPSeg's CLIP embeddings)
-- **Visual precision** (SAM2's prompted segmentation)
-- **Temporal coherence** (optical flow propagation)
-
-...we achieve robust object tracking from text alone. The approach generalizes to any object describable in natural language, making it highly practical for creative video editing, dataset annotation, and visual effects applications where manual annotation is prohibitive.
-
----
+- **CLIPSeg**: `CIDAS/clipseg-rd64-refined` - Text-to-image segmentation
+- **SAM2**: `facebook/sam2.1-hiera-small` - Segment Anything Model 2
+- **Optical Flow**: Farneback dense optical flow for temporal consistency
 
 ## Troubleshooting
 
-### Common Issues
-1. **"CUDA out of memory"**: 
-   - Restart runtime and re-run
-   - Use smaller video resolution or shorter clips
-   
-2. **"Cannot open video"**:
-   - Verify `VIDEO_PATH` is correct
-   - Ensure video is uploaded to Colab filesystem
-   
-3. **"No foreground found"**:
-   - Try more specific text prompt
-   - Check if object is visible in first frame
-   
-4. **Slow processing**:
-   - Confirm GPU is enabled (check `torch.cuda.is_available()`)
-   - Reduce `max_seconds` parameter
+**"No foreground found"**: Try a more specific or different text prompt
+
+**Mask collapses in video**: Reduce `stride` or adjust `min_cc_area`
+
+**Out of memory**: Use SAM2 `hiera-tiny` variant or process fewer frames
+
+**Poor segmentation**: Experiment with different prompts or adjust `top_pct_fallback`
+
+## License
+
+This project uses:
+- CLIPSeg (Apache 2.0)
+- SAM2 (Apache 2.0)
+- See individual model licenses for details
+
+## Acknowledgments
+
+- [CLIPSeg](https://github.com/timojl/clipseg) by Lüddecke & Ecker
+- [Segment Anything 2](https://github.com/facebookresearch/sam2) by Meta AI
+- Built on PyTorch, Transformers, and OpenCV
+
+---
+
+**Note**: The A100 GPU provides optimal performance, but the notebook can run on T4 GPUs with longer processing times. Adjust `max_seconds` and `stride` for lower-end hardware.
