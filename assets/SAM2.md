@@ -24,21 +24,21 @@ This project implements a two-stage segmentation approach:
 The pipeline generates three visualizations:
 
 1. **Heatmap**: CLIPSeg probability map showing confidence scores
-   ![Heatmap Example](assets/1stsam.png)
+   ![Heatmap Example](1stsam.png)
 
 2. **Binary Mask**: Thresholded segmentation mask (all detected instances)
-   ![Mask Example](assets/2ndsam.png)
+   ![Mask Example](2ndsam.png)
 
 3. **Segmented Overlay**: Final SAM2-refined segmentation with colored overlay
-   ![Segmented Example](assets/finalsam.png)
+   ![Segmented Example](finalsam.png)
 
 ### Video Segmentation Results
 
-- **Input Video**: [Download Input Video](assets/istockphoto-480841066-640_adpp_is.mp4)
-- ![](assets/istockphoto-480841066-640_adpp_is.gif)
-- **Output Video**: [Download Output Video](assets/text_segmentation_output.mp4)
+- **Input Video**: [Download Input Video](istockphoto-480841066-640_adpp_is.mp4)
+- ![](istockphoto-480841066-640_adpp_is.gif)
+- **Output Video**: [Download Output Video](text_segmentation_output.mp4)
 - MP4 file with colored segmentation overlays at original FPS
-- ![](assets/text_segmentation_output.gif)
+- ![](text_segmentation_output.gif)
 - Saved to `/content/text_segmentation_output.mp4`
 
 ## Model Details
