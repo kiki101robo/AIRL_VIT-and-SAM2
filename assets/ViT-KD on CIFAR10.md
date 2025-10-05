@@ -4,60 +4,6 @@
 ## Overview
 This implementation trains a Vision Transformer (ViT) on CIFAR-10 using knowledge distillation from a strong ResNet-50 teacher. The model achieves **95.69% test accuracy** with excellent per-class performance across all categories.
 
-## How to Run in Colab
-
-### Training + Evaluation
-1. **Download the q1.ipynb**
-2. **Set runtime**: Runtime → Change runtime type → GPU (T4/A100 recommended)
-3. **Run the all the cells**
-
-The script will:
-- Download CIFAR-10 automatically
-- Train a ResNet-50 teacher (300 epochs, ~56 minutes on A100)
-- Train the ViT student with KD (300 epochs, ~68 minutes on A100)
-- Save checkpoints: `teacher_resnet50_cifar10.pt`, `vit_cifar10_best.pt`, `vit_cifar10_last.pt`
-
-### Evaluation
-3. **If ran all the cells then it will run automaitically after training** (requires training to complete first)
-
-This generates:
-- Confusion matrices (counts and normalized)
-- Per-class accuracy bar chart
-- Sample predictions grid (36 images)
-- Detailed classification report
-
-All outputs saved to `eval_artifacts/` directory in the colab side bar mount.
-
-## Best Model Configuration
-
-### Architecture
-- **Patch size**: 4×4 (produces 8×8=64 patches from 32×32 images)
-- **Embedding dim**: 256
-- **Depth**: 12 transformer blocks
-- **Heads**: 8 attention heads per block
-- **MLP ratio**: 4 (hidden dim = 1024)
-- **Dropout**: 0.05
-- **DropPath**: 0.15 (linearly scaled across layers)
-- **Special design**: Last 4 blocks use class-attention (CLS attends to patches only)
-- **Dual-head output**: CLS + distillation token (averaged at inference)
-- **Parameters**: 10.6M trainable
-
-### Training Recipe
-- **Optimizer**: AdamW (lr=6e-4, weight_decay=0.05)
-- **Scheduler**: 5% linear warmup + cosine decay to 0
-- **Batch size**: 192 (train), 512 (test)
-- **Epochs**: 300
-- **Label smoothing**: 0.05 (disabled last 15 epochs)
-- **Augmentation**: TrivialAugmentWide + RandomCrop(32, pad=4) + RandomFlip + RandomErasing(p=0.25)
-- **Mixup/CutMix**: α=0.4/1.0 (disabled last 15 epochs)
-- **EMA**: decay 0.995→0.9995 (linearly scaled)
-- **Mixed precision**: AMP enabled
-
-### Knowledge Distillation
-- **Teacher**: ResNet-50 (88.71% accuracy, 23.5M params)
-- **KD temperature**: 2.0
-- **KD weight**: α=0.5 (50% KD loss, 50% CE loss)
-
 ## Results
 
 ### Overall Accuracy
@@ -83,13 +29,13 @@ All outputs saved to `eval_artifacts/` directory in the colab side bar mount.
 **Best performing classes**: Automobile, Frog, Ship, Truck (>97.4%)  
 **Most challenging class**: Cat (88.4% - confused with Dog 6.2% of the time)
 
-**![Per-class Accuracy Bar Chart](assets/per_class_accuracy.png)**
+**![Per-class Accuracy Bar Chart](per_class_accuracy.png)**
 
 ### Confusion Matrix Analysis
 
-**![Confusion Matrix (Counts)](assets/confusion_counts.png)**
+**![Confusion Matrix (Counts)](confusion_counts.png)**
 
-**![Confusion Matrix (Normalized)](assets/confusion_normalized.png)**
+**![Confusion Matrix (Normalized)](confusion_normalized.png)**
 
 The confusion matrices reveal interesting patterns:
 - **Strong diagonal**: Most classes achieve >94% correct classification
