@@ -99,7 +99,7 @@ The confusion matrices reveal interesting patterns:
 
 ### Sample Predictions
 
-**![Prediction Grid here](assets/pred_grid.png)**
+**![Prediction Grid here](pred_grid.png)**
 
 The prediction grid shows high-confidence correct classifications across diverse examples, with the model maintaining >90% confidence even on challenging instances (occluded objects, unusual viewpoints, low contrast).
 
